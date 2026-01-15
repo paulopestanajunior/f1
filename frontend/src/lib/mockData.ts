@@ -1,6 +1,6 @@
 // Mock data for F1 Portal - simulating API responses
 
-export const seasons = [2024, 2023, 2022, 2021, 2020];
+export const seasons = [2025, 2024, 2023, 2022, 2021, 2020];
 
 export interface Driver {
   id: string;
