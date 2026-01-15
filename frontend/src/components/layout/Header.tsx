@@ -67,7 +67,7 @@ export function Header() {
               <SelectContent>
                 {seasons.map((season) => (
                   <SelectItem key={season} value={season.toString()}>
-                    Temporada {season}
+                    {season}
                   </SelectItem>
                 ))}
               </SelectContent>

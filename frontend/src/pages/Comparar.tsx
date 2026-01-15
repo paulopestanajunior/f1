@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { PointsChart } from '@/components/charts/PointsChart';
 import { useDrivers } from '@/lib/api/hooks';
+import { useSeason } from '@/lib/season-context';
 import { Users, Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import {
   Select,
@@ -12,6 +13,7 @@ import {
 } from '@/components/ui/select';
 
 export default function Comparar() {
+  const { season } = useSeason();
   const [driver1Id, setDriver1Id] = useState<string>('');
   const [driver2Id, setDriver2Id] = useState<string>('');
 
@@ -100,7 +102,7 @@ export default function Comparar() {
         {/* Header */}
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Comparar Pilotos</h1>
-          <p className="text-muted-foreground">Compare o desempenho de dois pilotos na temporada</p>
+          <p className="text-muted-foreground">Compare o desempenho de dois pilotos na temporada {season}</p>
         </div>
 
         {/* Selectors */}
@@ -299,7 +301,7 @@ export default function Comparar() {
             </div>
 
             <div className="text-center py-4">
-              <p className="text-sm text-muted-foreground">Comparação baseada em dados da temporada</p>
+              <p className="text-sm text-muted-foreground">Comparação baseada em dados da temporada {season}</p>
             </div>
           </>
         ) : null}

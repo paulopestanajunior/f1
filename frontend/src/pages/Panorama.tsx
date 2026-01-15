@@ -4,10 +4,19 @@ import { HighlightCard } from '@/components/cards/HighlightCard';
 import { DriverCard } from '@/components/cards/DriverCard';
 import { ResultsTable } from '@/components/tables/ResultsTable';
 import { useDrivers, useSeasonOverview } from '@/lib/api/hooks';
+import { useSeason } from '@/lib/season-context';
 import { Trophy, TrendingUp, TrendingDown, Users, Flag, Calendar, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
+
 
 export default function Panorama() {
+  const { season } = useSeason();
   const { data: overview, isLoading: overviewLoading } = useSeasonOverview();
   const { data: driverData } = useDrivers();
 
@@ -38,7 +47,7 @@ export default function Panorama() {
           <div className="card-editorial card-highlight p-6 md:p-8">
             <div className="flex items-center gap-2 text-primary mb-2">
               <Trophy size={20} />
-              <span className="text-sm font-semibold uppercase tracking-wide">Panorama da Temporada 2024</span>
+              <span className="text-sm font-semibold uppercase tracking-wide">Panorama da Temporada {season}</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
               {overviewData.leader.name} lidera o campeonato
@@ -56,9 +65,25 @@ export default function Panorama() {
                 <p className="text-3xl md:text-4xl font-extrabold text-foreground">{overviewData.lastRace.round}</p>
                 <p className="text-sm text-muted-foreground">Corridas realizadas</p>
               </div>
-              <div>
-                <p className="text-3xl md:text-4xl font-extrabold text-foreground">{overviewData.leader.consistency}%</p>
-                <p className="text-sm text-muted-foreground">Consistência</p>
+              <div className="flex flex-col items-center">
+                <p className="text-3xl md:text-4xl font-extrabold text-foreground">
+                  {overviewData.leader.consistency}%
+                </p>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-help">
+                      <span className="text-sm text-muted-foreground">Consistência</span>
+                      <Info size={14} className="text-muted-foreground" />
+                    </div>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p className="max-w-xs text-xs">
+                      Percentual de corridas em que o piloto terminou no Top 10 ao longo da temporada.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
             <div className="border-t border-border pt-4">
@@ -170,7 +195,7 @@ export default function Panorama() {
         <section className="text-center py-4">
           <p className="text-sm text-muted-foreground">
             <Calendar size={14} className="inline mr-1" />
-            Análise baseada nas últimas corridas disponíveis • Temporada 2024
+            Análise baseada nas últimas corridas disponíveis • Temporada {season}
           </p>
         </section>
       </div>

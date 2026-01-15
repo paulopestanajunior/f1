@@ -162,7 +162,7 @@ export default function PilotoDetalhe() {
                   'bg-muted'
                 }`}
               >
-                <p className="text-xs text-muted-foreground mb-1">R{index + 1}</p>
+                <p className="text-xs text-muted-foreground mb-1">R{driver.lastRacesRounds[index]}</p>
                 <p className="font-bold text-foreground">{points}</p>
               </div>
             ))}

@@ -1,11 +1,14 @@
 import { Layout } from '@/components/layout/Layout';
 import { RaceCard } from '@/components/cards/RaceCard';
-import { useRaces } from '@/lib/api/hooks';
-import { DEFAULT_SEASON } from '@/lib/constants';
+import { useRaces, useSeasonOverview } from '@/lib/api/hooks';
+import { useSeason } from '@/lib/season-context';
 import { Calendar, Flag } from 'lucide-react';
 
 export default function Corridas() {
-  const { data: raceData, isLoading } = useRaces(DEFAULT_SEASON);
+  const { season } = useSeason();
+
+  const { data: raceData, isLoading } = useRaces();
+  const { data: overview, isLoading: overviewLoading } = useSeasonOverview(); 
   const raceList = raceData || [];
 
   return (
@@ -22,19 +25,19 @@ export default function Corridas() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="card-editorial p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{raceList.length}</p>
-            <p className="text-sm text-muted-foreground">Corridas analisadas</p>
+            <p className="text-2xl font-bold text-primary"> {overview?.racesCount ?? 0}</p>
+            <p className="text-sm text-muted-foreground">Corridas realizadas</p>
           </div>
           <div className="card-editorial p-4 text-center">
-            <p className="text-2xl font-bold text-foreground">23</p>
+            <p className="text-2xl font-bold text-foreground">{overview?.racesCount ?? 0}</p>
             <p className="text-sm text-muted-foreground">Total na temporada</p>
           </div>
           <div className="card-editorial p-4 text-center">
-            <p className="text-2xl font-bold text-foreground">5</p>
+            <p className="text-2xl font-bold text-foreground">{overview?.winnersCount ?? 0}</p>
             <p className="text-sm text-muted-foreground">Vencedores diferentes</p>
           </div>
           <div className="card-editorial p-4 text-center">
-            <p className="text-2xl font-bold text-foreground">4</p>
+            <p className="text-2xl font-bold text-foreground">{overview?.podiumTeamsCount ?? 0}</p>
             <p className="text-sm text-muted-foreground">Equipes no pódio</p>
           </div>
         </div>

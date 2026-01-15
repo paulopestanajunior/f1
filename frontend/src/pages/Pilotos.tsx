@@ -4,10 +4,14 @@ import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { DriverCard } from '@/components/cards/DriverCard';
 import { useDrivers } from '@/lib/api/hooks';
+import { useSeason } from '@/lib/season-context';
+
 import { Search, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export default function Pilotos() {
+  const { season } = useSeason();
+
   const [searchTerm, setSearchTerm] = useState('');
   const { data: driverData, isLoading } = useDrivers();
   const driverList = driverData || [];
@@ -25,7 +29,7 @@ export default function Pilotos() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Pilotos</h1>
           <p className="text-muted-foreground">
-            Entenda quem está bem e quem não está na temporada 2024
+            Entenda quem está bem e quem não está na temporada {season}
           </p>
         </div>
 

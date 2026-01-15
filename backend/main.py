@@ -41,7 +41,6 @@ class Race(BaseModel):
     highlights: List[str] = []
     fastestLap: Optional[str] = None
 
-
 class Driver(BaseModel):
     id: str
     name: str
@@ -57,6 +56,7 @@ class Driver(BaseModel):
     trend: str
     pointsHistory: List[float]
     lastRaces: List[float]
+    lastRacesRounds: List[int]
     photo: Optional[str] = None
 
 
@@ -68,6 +68,10 @@ class SeasonOverview(BaseModel):
     fallingDriver: Driver
     dominantTeam: str
     lastRace: Race
+    racesCount: int
+    winnersCount: int
+    podiumTeamsCount: int
+    totalRoundsInSeason: int | None = None
 
 
 app = FastAPI(title="F1 Data Bridge", version="0.1.0")
@@ -78,7 +82,7 @@ app.add_middleware(
         "http://localhost:8080",
         "http://127.0.0.1:8080",
         "https://f1-three-chi.vercel.app",
-        
+
     ],
     allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
@@ -406,8 +410,12 @@ def _build_snapshot_from_ergast(season: int, openf1_lookup: Dict[str, Dict[str, 
         consistency = round((top10 / len(positions)) * 100) if positions else 0
         team_color = _normalize_hex_color(stats["teamColor"])
 
-        ordered_points = [p for _, p in sorted(stats["points_by_round"].items())]
-        last8 = ordered_points[-8:]
+        ordered = sorted(stats["points_by_round"].items())  # [(round, points), ...]
+        points_history = [pts for _, pts in ordered]
+
+        last8 = ordered[-8:]
+        last_races = [pts for _, pts in last8]
+        last_rounds = [rnd for rnd, _ in last8]
 
         drivers.append(
             Driver(
@@ -422,12 +430,14 @@ def _build_snapshot_from_ergast(season: int, openf1_lookup: Dict[str, Dict[str, 
                 podiums=stats["podiums"],
                 avgPosition=round(avg_pos, 2),
                 consistency=consistency,
-                trend=_trend_from_points(ordered_points),
-                pointsHistory=ordered_points,
-                lastRaces=last8,            
+                trend=_trend_from_points(points_history),
+                pointsHistory=points_history,
+                lastRaces=last_races,
+                lastRacesRounds=last_rounds,
                 photo=stats["photo"],
             )
         )
+
 
     drivers_sorted = sorted(drivers, key=lambda d: d.points, reverse=True)
     races_sorted = sorted(races, key=lambda r: r.round)
@@ -654,8 +664,12 @@ def _season_snapshot_compute(season: int) -> Dict[str, Any]:
             consistency = round((top10 / finishes) * 100)
 
         # pointsHistory (ordenado por round)
-        points_history = [p for _, p in sorted(stats["points_by_round"].items())]
-        last8 = points_history[-8:]
+        ordered = sorted(stats["points_by_round"].items())  # [(round, points), ...]
+        points_history = [pts for _, pts in ordered]
+
+        last8 = ordered[-8:]
+        last_races = [pts for _, pts in last8]
+        last_rounds = [rnd for rnd, _ in last8]
 
         team_color = _normalize_hex_color(stats["teamColor"])
 
@@ -679,7 +693,8 @@ def _season_snapshot_compute(season: int) -> Dict[str, Any]:
                 consistency=consistency,
                 trend=_trend_from_points(points_history),
                 pointsHistory=points_history,
-                lastRaces=last8,
+                lastRaces=last_races,
+                lastRacesRounds=last_rounds,
                 photo=stats["photo"],
             )
         )
@@ -696,7 +711,7 @@ def _season_snapshot_compute(season: int) -> Dict[str, Any]:
     }
 
 
-def _build_overview(snapshot: Dict[str, Any]) -> SeasonOverview:
+def _build_overview(snapshot: Dict[str, Any], season: int) -> SeasonOverview:
     drivers: List[Driver] = snapshot.get("drivers", [])
     races: List[Race] = snapshot.get("races", [])
     dominant_team: str = snapshot.get("dominant_team", "N/A")
@@ -704,19 +719,44 @@ def _build_overview(snapshot: Dict[str, Any]) -> SeasonOverview:
     if not drivers:
         raise HTTPException(status_code=404, detail="Sem dados de temporada disponíveis.")
 
+    # Se não tem corrida, tenta usar dummy (se existir)
     if not races and snapshot.get("overview_dummy_race"):
         races = [snapshot["overview_dummy_race"]]
 
     leader = drivers[0]
     last_race = races[-1]
 
+    # ---------- STATS (somente corridas com resultado) ----------
+    races_with_results = [r for r in races if getattr(r, "results", None)]
+    races_count = len(races_with_results)
+
+    winners: set[str] = set()
+    podium_teams: set[str] = set()
+
+    for r in races_with_results:
+        # winner
+        winner_row = next((x for x in r.results if x.position == 1), None)
+        if winner_row:
+            winners.add(winner_row.driverId)
+
+        # podium teams
+        for x in r.results:
+            if x.position <= 3:
+                podium_teams.add(x.team)
+
+    winners_count = len(winners)
+    podium_teams_count = len(podium_teams)
+
+    # total "realizadas com resultado" (incremental/dinâmico)
+    total_rounds_in_season = races_count
+
+    # momentum
     def _recent_avg(d: Driver) -> float:
         recent = d.lastRaces[-3:] if d.lastRaces else []
         return (sum(recent) / len(recent)) if recent else 0.0
 
     top_momentum = max(drivers, key=_recent_avg)
     falling_driver = min(drivers, key=_recent_avg)
-
 
     highlights = [
         f"{leader.name} lidera o campeonato com {leader.points} pontos",
@@ -725,13 +765,21 @@ def _build_overview(snapshot: Dict[str, Any]) -> SeasonOverview:
     ]
 
     return SeasonOverview(
+        season=season,
+
         leader=leader,
         highlights=highlights,
         topMomentum=top_momentum,
         fallingDriver=falling_driver,
         dominantTeam=dominant_team,
         lastRace=last_race,
+
+        racesCount=races_count,
+        winnersCount=winners_count,
+        podiumTeamsCount=podium_teams_count,
+        totalRoundsInSeason=total_rounds_in_season,
     )
+
 
 
 @app.get("/api/drivers", response_model=List[Driver])
@@ -764,7 +812,7 @@ def get_race_detail(race_id: str, season: int = Query(default=2024, ge=1950)) ->
 @app.get("/api/overview", response_model=SeasonOverview)
 def get_overview(season: int = Query(default=2024, ge=1950)) -> SeasonOverview:
     snapshot = _season_snapshot(season)
-    return _build_overview(snapshot)
+    return _build_overview(snapshot, season)
 
 
 @app.get("/healthz")
@@ -774,6 +822,7 @@ def healthcheck():
 @app.get("/api/v1/overview", response_model=SeasonOverview)
 def get_overview_v1(season: int = Query(default=2024, ge=1950)) -> SeasonOverview:
     return get_overview(season)
+
 
 @app.get("/api/v1/drivers", response_model=List[Driver])
 def get_drivers_v1(season: int = Query(default=2024, ge=1950)) -> List[Driver]:

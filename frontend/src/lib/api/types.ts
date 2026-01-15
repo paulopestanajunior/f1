@@ -13,6 +13,7 @@ export interface Driver {
   trend: 'up' | 'down' | 'stable';
   pointsHistory: number[];
   lastRaces: number[];
+  lastRacesRounds: number[];
   photo?: string;
 }
 
@@ -46,4 +47,8 @@ export interface SeasonOverview {
   fallingDriver: Driver;
   dominantTeam: string;
   lastRace: Race;
+  racesCount: number;
+  winnersCount: number;
+  podiumTeamsCount: number;
+  totalRoundsInSeason: number;
 }
