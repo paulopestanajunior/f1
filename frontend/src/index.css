@@ -1,0 +1,216 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* GloboEsporte-inspired F1 Portal Design System */
+    
+    /* Primary - Verde GE */
+    --primary: 152 100% 31%;
+    --primary-foreground: 0 0% 100%;
+    --primary-dark: 152 100% 21%;
+    
+    /* Backgrounds */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 10%;
+    
+    /* Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    
+    /* Secondary - Cinza claro */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 20%;
+    
+    /* Muted */
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
+    
+    /* Accent */
+    --accent: 152 60% 95%;
+    --accent-foreground: 152 100% 21%;
+    
+    /* Status Colors */
+    --success: 152 70% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 72% 51%;
+    --danger-foreground: 0 0% 100%;
+    
+    /* Destructive */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders */
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 152 100% 31%;
+    
+    --radius: 0.5rem;
+    
+    /* Sidebar */
+    --sidebar-background: 152 100% 21%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 152 100% 21%;
+    --sidebar-accent: 152 50% 25%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 152 50% 30%;
+    --sidebar-ring: 0 0% 100%;
+    
+    /* Custom gradients */
+    --gradient-header: linear-gradient(135deg, hsl(152 100% 21%) 0%, hsl(152 80% 28%) 100%);
+    --gradient-card-highlight: linear-gradient(180deg, hsl(152 60% 95%) 0%, hsl(0 0% 100%) 100%);
+    
+    /* Shadows */
+    --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.04);
+    --shadow-card-hover: 0 4px 16px -4px rgba(0, 0, 0, 0.12), 0 8px 32px -8px rgba(0, 0, 0, 0.08);
+    --shadow-header: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark {
+    --primary: 152 70% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-dark: 152 100% 31%;
+    
+    --background: 0 0% 7%;
+    --foreground: 0 0% 95%;
+    
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 95%;
+    
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
+    
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
+    
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    
+    --accent: 152 30% 15%;
+    --accent-foreground: 152 70% 60%;
+    
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 152 70% 45%;
+    
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 152 70% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 152 70% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Editorial Card Styles */
+  .card-editorial {
+    @apply bg-card rounded-lg border border-border transition-all duration-200;
+    box-shadow: var(--shadow-card);
+  }
+  
+  .card-editorial:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  .card-highlight {
+    background: var(--gradient-card-highlight);
+    @apply border-primary/20;
+  }
+  
+  /* Stat display */
+  .stat-value {
+    @apply text-3xl font-extrabold text-primary;
+  }
+  
+  .stat-label {
+    @apply text-sm font-medium text-muted-foreground uppercase tracking-wide;
+  }
+  
+  /* Badge styles */
+  .badge-positive {
+    @apply bg-success/10 text-success border-success/20;
+  }
+  
+  .badge-negative {
+    @apply bg-danger/10 text-danger border-danger/20;
+  }
+  
+  .badge-neutral {
+    @apply bg-muted text-muted-foreground;
+  }
+  
+  /* Table styles */
+  .table-f1 {
+    @apply w-full text-sm;
+  }
+  
+  .table-f1 th {
+    @apply bg-secondary text-secondary-foreground font-semibold text-left px-4 py-3 uppercase text-xs tracking-wider;
+  }
+  
+  .table-f1 td {
+    @apply px-4 py-3 border-b border-border;
+  }
+  
+  .table-f1 tr:hover td {
+    @apply bg-accent/50;
+  }
+  
+  /* Header gradient */
+  .header-gradient {
+    background: var(--gradient-header);
+  }
+  
+  /* Position indicators */
+  .position-gain {
+    @apply text-success font-semibold;
+  }
+  
+  .position-loss {
+    @apply text-danger font-semibold;
+  }
+  
+  /* Section titles */
+  .section-title {
+    @apply text-xl font-bold text-foreground flex items-center gap-2 mb-4;
+  }
+  
+  .section-title::before {
+    content: '';
+    @apply w-1 h-6 bg-primary rounded-full;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
